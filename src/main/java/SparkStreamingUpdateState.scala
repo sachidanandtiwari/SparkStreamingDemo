@@ -27,7 +27,7 @@ object SparkStreamingUpdateState {
     val zookeeperServer = "localhost:2181"
     val kafkaBroker = "localhost:9092"
     
-    val conf = new SparkConf().setAppName("consumer-kafka-demo").
+    val conf = new SparkConf().setAppName("sparkstreamingdemo").
                     setMaster("local[*]").
                     set("spark.streaming.stopGracefullyOnShutdown","true")
     
@@ -63,7 +63,7 @@ object SparkStreamingUpdateState {
     val TIME_IN_MS = System.currentTimeMillis().toString()
     val input = kafkaInputStream.map(stream => (stream.value.split(" ").map { e => e.trim() }.array(0), stream.value.split(" ").map { e => e.trim() }.array(3).substring(1)))
     val inputMap = input.map(line => (line,1)).updateStateByKey(updateFunc)
-    val filterInputMap = inputMap.filter(tuple => (tuple._2 > 4)) 
+    val filterInputMap = inputMap.filter(tuple => (tuple._2 > 1)) 
     val ipMap = filterInputMap.map(tuple => tuple._1._1)
 
     ipMap.foreachRDD{inputRDD =>
@@ -83,21 +83,4 @@ object SparkStreamingUpdateState {
   }
   
   
-}
-
-
-/** Lazily instantiated singleton instance of SparkSession */
-object SparkSessionSingleton {
-
-  @transient  private var instance: SparkSession = _
-
-  def getInstance(sparkConf: SparkConf): SparkSession = {
-    if (instance == null) {
-      instance = SparkSession
-        .builder
-        .config(sparkConf)
-        .getOrCreate()
-    }
-    instance
-  }
 }
